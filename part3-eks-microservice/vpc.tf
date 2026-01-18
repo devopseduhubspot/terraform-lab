@@ -23,7 +23,52 @@ module "vpc" {
   # NAT Gateway settings (allows private servers to access internet)
   enable_nat_gateway = true   # Required for EKS nodes to download container images
   single_nat_gateway = true   # Use 1 gateway (cheaper) instead of 2 (more reliable)
+  
+  # Enable DNS settings (required for EKS)
+  enable_dns_hostnames = true
+  enable_dns_support   = true
+  
+  # EKS-specific tagging (CRITICAL - without this EKS fails)
+  public_subnet_tags = {
+    "kubernetes.io/role/elb" = "1"  # Required for external load balancers
+    "kubernetes.io/cluster/student-eks-cluster" = "owned"
+  }
+  
+  private_subnet_tags = {
+    "kubernetes.io/role/internal-elb" = "1"  # Required for internal load balancers  
+    "kubernetes.io/cluster/student-eks-cluster" = "owned"
+  }
+  
+  # General tags for all VPC resources
+  tags = {
+    Environment = "learning"
+    Project     = "terraform-training"
+    ManagedBy   = "terraform"
+  }
 }
+
+# 🎓 Real-World Analogy:
+# VPC = Your company's private campus
+# Public subnets = Reception areas (internet access)
+# Private subnets = Secure office spaces (no direct internet)
+# NAT Gateway = Secure internet checkpoint for private areas
+# Availability Zones = Different buildings for backup
+
+# 💡 Why This Setup:
+# - Private subnets: Keep application servers secure
+# - Public subnets: Handle internet traffic via load balancers
+# - Multiple AZs: If one fails, the other continues
+# - Single NAT: Saves $45/month vs dual NAT setup
+# - EKS tags: Required for Kubernetes to create load balancers
+
+# 🔧 EKS Integration Tags Explained:
+# - "kubernetes.io/role/elb": Tells EKS these subnets can host external load balancers
+# - "kubernetes.io/role/internal-elb": For internal load balancers within cluster
+# - "kubernetes.io/cluster/CLUSTER-NAME": Associates subnets with specific EKS cluster
+
+# 🏢 Enterprise Examples:
+# Netflix, Uber, Airbnb all use similar VPC architectures
+# This is production-grade networking!
 
 # 🎓 Real-World Analogy:
 # VPC = Your company's private campus
