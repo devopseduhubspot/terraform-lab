@@ -20,7 +20,7 @@
 
 ---
 
-## 🎯 Learning Path (3 Progressive Parts)
+## 🎯 Learning Path (4 Progressive Parts)
 
 ### 📚 Part 1: Baby Steps (Local File)
 - **What:** Create a simple text file on your computer
@@ -40,6 +40,12 @@
 - **Time:** 30 minutes
 - **Analogy:** Building and furnishing an entire office
 
+### 🎭 Part 4: Configuration Automation (Ansible)
+- **What:** Automatically configure servers after creation
+- **Why:** Complete the DevOps workflow (Infrastructure + Configuration)
+- **Time:** 30-60 minutes
+- **Analogy:** Hiring interior designers to furnish the office automatically
+
 ---
 
 ## 🚨 CRITICAL: Money-Saving Rules
@@ -55,6 +61,7 @@
 - **Part 1:** FREE (local only)
 - **Part 2:** ~$0.01/day (destroy immediately)
 - **Part 3:** ~$2-5/day (destroy within 1 hour)
+- **Part 4:** ~$0.50/day (small EC2 instances, destroy within 2 hours)
 
 ### 🛡️ Safety Checklist:
 - [ ] ✅ Set up AWS billing alerts ($5 limit)
@@ -105,6 +112,8 @@ After completing all parts, you'll understand:
 - ✅ Basic cloud concepts (storage, networking, containers)
 - ✅ Why DevOps engineers are highly paid
 - ✅ How to avoid expensive cloud mistakes
+- ✅ **NEW:** Configuration management with Ansible
+- ✅ **NEW:** Complete DevOps workflow (Infrastructure → Configuration → Deployment)
 
 ---
 
@@ -114,5 +123,6 @@ After completing all parts, you'll understand:
 1. 📖 Complete [installation guide](installation.md)
 2. 🏃‍♀️ Start with [Part 1](part1-terraform-basic/)
 3. 💬 Ask questions if stuck - everyone was a beginner once!
+4. 🎭 **NEW:** Try [Part 4](part4-ansible-config/) for complete DevOps workflow!
 
 **Remember:** The goal is learning, not perfection. Take your time! 🌟

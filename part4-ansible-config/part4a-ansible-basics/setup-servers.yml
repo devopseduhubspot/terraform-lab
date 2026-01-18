@@ -1,0 +1,167 @@
+# 🎭 Ansible Playbook: Basic Server Setup
+# This playbook configures newly created servers with essential software and settings
+
+---
+- name: Basic Server Configuration
+  hosts: webservers  # Run on all servers in the webservers group
+  become: yes        # Use sudo for system-level changes
+  gather_facts: yes  # Collect system information
+
+  # Variables used throughout the playbook
+  vars:
+    packages_to_install:
+      - htop          # System monitor
+      - git           # Version control
+      - curl          # HTTP client  
+      - wget          # File downloader
+      - unzip         # Archive utility
+      - tree          # Directory tree display
+      - vim           # Text editor
+      - nginx         # Web server (for future use)
+    
+    user_to_create: "ansible-user"
+    user_home: "/home/{{ user_to_create }}"
+
+  # Tasks executed in order on each server
+  tasks:
+    # Task 1: Update package repository (like "checking for new software")
+    - name: Update package repository
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600  # Cache valid for 1 hour
+      tags: ['setup', 'packages']
+
+    # Task 2: Upgrade all existing packages to latest versions  
+    - name: Upgrade all packages to latest version
+      apt:
+        upgrade: dist
+        autoremove: yes
+        autoclean: yes
+      register: upgrade_result
+      tags: ['setup', 'packages']
+
+    # Task 3: Install essential software packages
+    - name: Install essential packages
+      apt:
+        name: "{{ packages_to_install }}"
+        state: present  # Ensure packages are installed
+        update_cache: yes
+      tags: ['packages']
+
+    # Task 4: Create a dedicated user for applications
+    - name: Create application user
+      user:
+        name: "{{ user_to_create }}"
+        shell: /bin/bash
+        create_home: yes
+        home: "{{ user_home }}"
+        groups: sudo
+        append: yes
+      tags: ['users']
+
+    # Task 5: Create useful directories
+    - name: Create application directories
+      file:
+        path: "{{ item }}"
+        state: directory
+        mode: '0755'
+        owner: "{{ user_to_create }}"
+        group: "{{ user_to_create }}"
+      loop:
+        - "{{ user_home }}/apps"
+        - "{{ user_home }}/logs"  
+        - "{{ user_home }}/backups"
+      tags: ['directories']
+
+    # Task 6: Set up basic firewall (ufw)
+    - name: Install and configure firewall
+      ufw:
+        rule: allow
+        port: "{{ item }}"
+        proto: tcp
+      loop:
+        - '22'    # SSH
+        - '80'    # HTTP
+        - '443'   # HTTPS
+      tags: ['security']
+
+    - name: Enable firewall
+      ufw:
+        state: enabled
+        policy: deny
+        direction: incoming
+      tags: ['security']
+
+    # Task 7: Configure system timezone
+    - name: Set timezone to UTC
+      timezone:
+        name: UTC
+      tags: ['system']
+
+    # Task 8: Create a system info file
+    - name: Create system information file
+      template:
+        src: system_info.j2
+        dest: "{{ user_home }}/system_info.txt"
+        owner: "{{ user_to_create }}"
+        group: "{{ user_to_create }}"
+        mode: '0644'
+      tags: ['info']
+
+    # Task 9: Set up log rotation for applications
+    - name: Configure log rotation
+      copy:
+        content: |
+          {{ user_home }}/logs/*.log {
+              daily
+              missingok
+              rotate 7
+              compress
+              delaycompress
+              create 644 {{ user_to_create }} {{ user_to_create }}
+          }
+        dest: /etc/logrotate.d/ansible-user-logs
+        mode: '0644'
+      tags: ['logging']
+
+    # Task 10: Display completion message
+    - name: Display setup completion
+      debug:
+        msg: |
+          ✅ Server {{ inventory_hostname }} setup complete!
+          📦 Installed packages: {{ packages_to_install | join(', ') }}
+          👤 Created user: {{ user_to_create }}
+          🔒 Firewall configured
+          🕐 Timezone set to UTC
+      tags: ['info']
+
+  # Handlers (tasks that run when triggered)
+  handlers:
+    - name: restart nginx
+      service:
+        name: nginx
+        state: restarted
+      
+    - name: reload firewall
+      ufw:
+        state: reloaded
+
+# 🎓 Playbook Structure Explained:
+#
+# 1. Header: Defines which servers to target and execution settings
+# 2. Variables: Reusable values used throughout the playbook
+# 3. Tasks: Step-by-step instructions executed in order
+# 4. Handlers: Special tasks triggered by other tasks
+#
+# 💡 Key Concepts:
+# - Idempotency: Safe to run multiple times
+# - Tags: Allow running specific parts of playbook  
+# - Variables: Make playbooks flexible and reusable
+# - Handlers: Restart services only when needed
+#
+# 🚀 Real-World Usage:
+# This type of playbook is used to:
+# - Set up new servers consistently
+# - Ensure security compliance
+# - Install standard company software
+# - Prepare servers for application deployment
